@@ -16,6 +16,7 @@ export function renderSheet() {
   const st = STATUS[r.status];
   const isPublic = State.role === "public";
   const isStaff = State.role === "staff";
+  const isMine = State.citizenUser && r.reporter === State.citizenUser.username;
   const address = isPublic ? r.address.split(" ")[0] + "（詳細非公開）" : r.address;
 
   return `
@@ -26,7 +27,7 @@ export function renderSheet() {
           <div style="display:flex; align-items:center; gap:9px;">
             <div class="cat-icon" style="background:${cat.color}1A;">${renderIcon(cat.icon, 18, cat.color)}</div>
             <div>
-              <div style="font-weight:800; font-size:15px;">${r.title}</div>
+              <div style="font-weight:800; font-size:15px;">${r.title} ${isMine ? `<span class="badge" style="background:#16a34a1A; color:var(--green); margin-left:4px;">自分の報告</span>` : ""}</div>
               <div style="font-size:12px; color:var(--sub);">${cat.label} ・ ${r.part}</div>
             </div>
           </div>
@@ -44,7 +45,7 @@ export function renderSheet() {
             ? `<div class="kv" style="display:flex; gap:5px;"><b style="flex:none;">詳細</b><span>${r.comment}</span></div>`
             : `<div class="kv" style="font-style:italic; color:var(--sub);">コメント本文は公開ビューでは非表示です</div>`
         }
-        ${isStaff ? `<div class="kv"><b>通報者</b>${r.reporter}</div>` : ""}
+        ${isStaff ? `<div class="kv"><b>通報者ID</b>${r.reporter}</div>` : ""}
         ${isStaff && r.assignee ? `<div class="kv"><b>担当</b>${r.assignee}</div>` : ""}
 
         <div style="margin:12px 0;"><span class="badge" style="background:${st.color}1A; color:${st.color};">${renderIcon(st.icon, 12, st.color)} ${st.label}</span></div>

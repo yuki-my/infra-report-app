@@ -43,6 +43,12 @@ CREATE TABLE IF NOT EXISTS staff_users (
     display_name   TEXT NOT NULL,     -- 例: 「道路課 佐藤」
     municipality   TEXT NOT NULL      -- 例: 「世田谷区」
 );
+
+CREATE TABLE IF NOT EXISTS users (
+    username       TEXT PRIMARY KEY,  -- 市民が自分で決めるID（メールアドレス不要）
+    password_hash  TEXT NOT NULL,
+    created_at     INTEGER NOT NULL
+);
 """
 
 AREAS = [

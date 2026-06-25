@@ -53,10 +53,10 @@ export async function updateReportStatus(id, status, assignee) {
   return handle(res);
 }
 
-/* ----------------------------- 認証 ----------------------------- */
+/* ----------------------------- 市民ログイン ----------------------------- */
 
-export async function login(username, password) {
-  const res = await fetch(`${BASE}/auth/login`, {
+export async function citizenSignup(username, password) {
+  const res = await fetch(`${BASE}/auth/citizen/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "same-origin",
@@ -65,15 +65,39 @@ export async function login(username, password) {
   return handle(res);
 }
 
-export async function logout() {
-  const res = await fetch(`${BASE}/auth/logout`, {
+export async function citizenLogin(username, password) {
+  const res = await fetch(`${BASE}/auth/citizen/login`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     credentials: "same-origin",
+    body: JSON.stringify({ username, password }),
   });
+  return handle(res);
+}
+
+export async function citizenLogout() {
+  const res = await fetch(`${BASE}/auth/citizen/logout`, { method: "POST", credentials: "same-origin" });
+  return handle(res);
+}
+
+/* ----------------------------- 管理者ログイン ----------------------------- */
+
+export async function staffLogin(username, password) {
+  const res = await fetch(`${BASE}/auth/staff/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({ username, password }),
+  });
+  return handle(res);
+}
+
+export async function staffLogout() {
+  const res = await fetch(`${BASE}/auth/staff/logout`, { method: "POST", credentials: "same-origin" });
   return handle(res);
 }
 
 export async function fetchMe() {
   const res = await fetch(`${BASE}/auth/me`, { credentials: "same-origin" });
-  return handle(res); // ログインしていなければ null が返る
+  return handle(res); // { citizen: {...}|null, staff: {...}|null }
 }

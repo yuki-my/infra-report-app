@@ -21,9 +21,12 @@ export const State = {
   selectedId: null,
   toast: null,
 
-  staffUser: null,      // {username, displayName, municipality} ログイン中のみ値が入る
+  citizenUser: null,    // {username} 市民ログイン中のみ値が入る
+  staffUser: null,      // {username, displayName, municipality} 管理者ログイン中のみ値が入る
   showRoleSheet: false,  // 役割切替シートの表示/非表示
-  loginError: null,      // ログイン失敗時のエラーメッセージ
+  authTab: "login",      // citizenセクション内の "login" | "signup" タブ
+  loginError: null,      // ログイン/登録失敗時のエラーメッセージ
+  onlyMine: false,       // true: 自分が送った報告だけに絞る（市民ログイン時のみ使用可）
 
   // 新規報告フォームの入力途中の値
   form: {
@@ -55,12 +58,16 @@ export function resetForm() {
 }
 
 export function roleLabel() {
-  return State.role === "citizen" ? "市民" : State.role === "staff" ? "管理者" : "公開";
+  if (State.role === "staff") return State.staffUser ? State.staffUser.displayName : "管理者";
+  if (State.role === "citizen") return State.citizenUser ? State.citizenUser.username : "市民";
+  return "公開";
 }
 
-/** 役割に応じて表示してよい報告だけに絞る（クライアント側の表示制御） */
+/** 報告一覧。役割を問わず常に全件を対象にする。
+ * 市民ログイン中に「自分の報告のみ」がONになっている時だけ絞り込む。 */
 export function visibleReports() {
-  let list = State.reports;
-  if (State.role === "citizen") list = list.filter((r) => r.reporter === "あなた");
-  return list;
+  if (State.onlyMine && State.citizenUser) {
+    return State.reports.filter((r) => r.reporter === State.citizenUser.username);
+  }
+  return State.reports;
 }

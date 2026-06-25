@@ -12,11 +12,12 @@ export function reportCardHtml(r) {
   const cat = CATS[r.category];
   const st = STATUS[r.status];
   const address = State.role === "public" ? r.address.split(" ")[0] : r.address;
+  const isMine = State.citizenUser && r.reporter === State.citizenUser.username;
   return `
     <div class="report-card" data-open="${r.id}">
       <div class="cat-icon" style="background:${cat.color}1A;">${renderIcon(cat.icon, 18, cat.color)}</div>
       <div style="flex:1; min-width:0;">
-        <div class="rt">${r.title}</div>
+        <div class="rt">${r.title} ${isMine ? `<span class="badge" style="background:#16a34a1A; color:var(--green);">自分</span>` : ""}</div>
         <div class="ra">${renderIcon("pin", 11)} ${address} · ${timeAgo(r.createdAt)}</div>
       </div>
       <span class="badge" style="background:${st.color}1A; color:${st.color};">${renderIcon(st.icon, 11, st.color)} ${st.label}</span>
@@ -48,6 +49,16 @@ export function renderMapView() {
         <button data-mode="map" class="${State.mapMode === "map" ? "active" : ""}">${renderIcon("map", 13)} マップ</button>
         <button data-mode="list" class="${State.mapMode === "list" ? "active" : ""}">${renderIcon("list", 13)} リスト</button>
       </div>
+      ${
+        State.citizenUser
+          ? `
+        <div class="seg">
+          <button data-onlymine="0" class="${!State.onlyMine ? "active" : ""}">すべて</button>
+          <button data-onlymine="1" class="${State.onlyMine ? "active" : ""}">自分の報告のみ</button>
+        </div>
+      `
+          : ""
+      }
     </div>
     ${
       State.mapMode === "map"

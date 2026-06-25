@@ -74,6 +74,11 @@ export function renderFormView() {
     </div>
 
     <button class="btn-primary" id="submitBtn" style="width:100%;">${renderIcon("check", 16, "#fff")} 送信する</button>
+    ${
+      !State.citizenUser
+        ? `<div style="text-align:center; font-size:11.5px; color:var(--sub); margin-top:10px;">ログインせずに送信すると「ゲスト投稿」として記録されます。右上の「市民」からログインすると、自分の報告として記録されます。</div>`
+        : `<div style="text-align:center; font-size:11.5px; color:var(--sub); margin-top:10px;">「${State.citizenUser.username}」として送信されます。</div>`
+    }
   `;
 }
 

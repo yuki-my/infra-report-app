@@ -172,3 +172,46 @@ def verify_staff_login(username, password):
         "displayName": row["display_name"],
         "municipality": row["municipality"],
     }
+
+
+def create_user(username, password):
+    """市民アカウントを新規登録する。
+    ユーザーIDが既に使われている場合は ValueError を投げる。"""
+    username = (username or "").strip()
+    password = password or ""
+
+    if len(username) < 3 or len(username) > 20:
+        raise ValueError("ユーザーIDは3〜20文字で入力してください")
+    if " " in username:
+        raise ValueError("ユーザーIDに空白は使用できません")
+    if len(password) < 4:
+        raise ValueError("パスワードは4文字以上で入力してください")
+
+    conn = get_db()
+    existing = conn.execute("SELECT username FROM users WHERE username = ?", (username,)).fetchone()
+    if existing is not None:
+        conn.close()
+        raise ValueError("このユーザーIDは既に使われています")
+
+    from werkzeug.security import generate_password_hash
+
+    conn.execute(
+        "INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)",
+        (username, generate_password_hash(password), int(time.time() * 1000)),
+    )
+    conn.commit()
+    conn.close()
+    return {"username": username}
+
+
+def verify_user_login(username, password):
+    """市民アカウントの認証。成功時は {username}、失敗時はNoneを返す。"""
+    conn = get_db()
+    row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+    conn.close()
+
+    if row is None:
+        return None
+    if not check_password_hash(row["password_hash"], password):
+        return None
+    return {"username": row["username"]}

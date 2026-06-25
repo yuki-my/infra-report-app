@@ -7,7 +7,18 @@
 
 import { renderIcon } from "./icons.js";
 import { State, resetForm, roleLabel, visibleReports } from "./state.js";
-import { fetchReports, fetchStats, createReport, updateReportStatus, login, logout, fetchMe } from "./api.js";
+import {
+  fetchReports,
+  fetchStats,
+  createReport,
+  updateReportStatus,
+  citizenSignup,
+  citizenLogin,
+  citizenLogout,
+  staffLogin,
+  staffLogout,
+  fetchMe,
+} from "./api.js";
 import { renderMapView, mountListMap, reportCardHtml } from "./views/mapView.js";
 import { renderFormView, mountFormMap, nearestArea } from "./views/formView.js";
 import { renderDashboardView } from "./views/dashboardView.js";
@@ -19,7 +30,7 @@ const app = document.getElementById("app");
 /* ----------------------------- データ取得 ----------------------------- */
 
 async function loadReports() {
-  const reporterFilter = State.role === "citizen" ? "あなた" : null;
+  const reporterFilter = State.onlyMine && State.citizenUser ? State.citizenUser.username : null;
   State.reports = await fetchReports({
     category: State.fCat,
     status: State.fStatus,
@@ -29,7 +40,7 @@ async function loadReports() {
 }
 
 async function loadStats() {
-  const reporterFilter = State.role === "citizen" ? "あなた" : null;
+  const reporterFilter = State.onlyMine && State.citizenUser ? State.citizenUser.username : null;
   State.stats = await fetchStats({ reporter: reporterFilter });
 }
 
@@ -45,7 +56,7 @@ function renderShell() {
       <div class="topbar-right">
         <button class="role-pill" id="roleToggle">${renderIcon("user", 13)} ${roleLabel()}</button>
         ${
-          State.staffUser
+          State.staffUser || State.citizenUser
             ? `<button class="icon-btn" id="quickLogout" title="ログアウト">${renderIcon("logout", 17)}</button>`
             : ""
         }
@@ -71,7 +82,12 @@ function renderShell() {
     renderShell();
   };
   const quickLogout = document.getElementById("quickLogout");
-  if (quickLogout) quickLogout.onclick = () => doLogout();
+  if (quickLogout) {
+    quickLogout.onclick = () => {
+      if (State.role === "staff") doStaffLogout();
+      else doCitizenLogout();
+    };
+  }
 
   document.getElementById("fabReport").onclick = () => {
     State.view = "form";
@@ -124,33 +140,82 @@ function wireRoleSheet() {
   };
 
   app.querySelectorAll(".role-option").forEach((b) => {
+    if (b.disabled) return;
     b.onclick = async () => {
-      const role = b.dataset.role;
-      // 「管理者」は実際にログイン済みでない限り切替できない
-      if (role === "staff" && !State.staffUser) return;
-      State.role = role;
+      State.role = b.dataset.role;
       State.showRoleSheet = false;
       await refreshAndRender();
     };
   });
 
-  const logoutBtn = document.getElementById("staffLogoutBtn");
-  if (logoutBtn) logoutBtn.onclick = () => doLogout();
+  // 市民: ログイン/新規登録タブの切替
+  app.querySelectorAll("[data-authtab]").forEach((b) => {
+    b.onclick = () => {
+      State.authTab = b.dataset.authtab;
+      State.loginError = null;
+      renderShell();
+    };
+  });
 
-  const loginBtn = document.getElementById("staffLoginBtn");
-  if (loginBtn) {
-    loginBtn.onclick = () => doLogin();
-    // Enterキーでも送信できるようにする
-    ["staffUsername", "staffPassword"].forEach((id) => {
-      const el = document.getElementById(id);
-      el.onkeydown = (e) => {
-        if (e.key === "Enter") doLogin();
+  const citizenAuthBtn = document.getElementById("citizenAuthBtn");
+  if (citizenAuthBtn) {
+    citizenAuthBtn.onclick = () => doCitizenAuth();
+    ["citizenUsername", "citizenPassword"].forEach((id) => {
+      document.getElementById(id).onkeydown = (e) => {
+        if (e.key === "Enter") doCitizenAuth();
       };
     });
   }
+  const citizenLogoutBtn = document.getElementById("citizenLogoutBtn");
+  if (citizenLogoutBtn) citizenLogoutBtn.onclick = () => doCitizenLogout();
+
+  const staffLoginBtn = document.getElementById("staffLoginBtn");
+  if (staffLoginBtn) {
+    staffLoginBtn.onclick = () => doStaffLogin();
+    ["staffUsername", "staffPassword"].forEach((id) => {
+      document.getElementById(id).onkeydown = (e) => {
+        if (e.key === "Enter") doStaffLogin();
+      };
+    });
+  }
+  const staffLogoutBtn = document.getElementById("staffLogoutBtn");
+  if (staffLogoutBtn) staffLogoutBtn.onclick = () => doStaffLogout();
 }
 
-async function doLogin() {
+async function doCitizenAuth() {
+  const username = document.getElementById("citizenUsername").value.trim();
+  const password = document.getElementById("citizenPassword").value;
+  if (!username || !password) {
+    State.loginError = "ユーザーIDとパスワードを入力してください";
+    renderShell();
+    return;
+  }
+  try {
+    const action = State.authTab === "signup" ? citizenSignup : citizenLogin;
+    const user = await action(username, password);
+    State.citizenUser = user;
+    State.role = "citizen";
+    State.showRoleSheet = false;
+    State.loginError = null;
+    await refreshAndRender();
+    showToast(State.authTab === "signup" ? `登録しました（ID: ${user.username}）` : `ログインしました（ID: ${user.username}）`);
+  } catch (err) {
+    State.loginError = err.message;
+    renderShell();
+  }
+}
+
+async function doCitizenLogout() {
+  await citizenLogout();
+  State.citizenUser = null;
+  State.onlyMine = false;
+  if (State.role === "citizen") State.role = "public";
+  State.showRoleSheet = false;
+  await refreshAndRender();
+  showToast("市民アカウントからログアウトしました");
+}
+
+async function doStaffLogin() {
   const username = document.getElementById("staffUsername").value.trim();
   const password = document.getElementById("staffPassword").value;
   if (!username || !password) {
@@ -159,7 +224,7 @@ async function doLogin() {
     return;
   }
   try {
-    const user = await login(username, password);
+    const user = await staffLogin(username, password);
     State.staffUser = user;
     State.role = "staff";
     State.showRoleSheet = false;
@@ -172,13 +237,13 @@ async function doLogin() {
   }
 }
 
-async function doLogout() {
-  await logout();
+async function doStaffLogout() {
+  await staffLogout();
   State.staffUser = null;
   State.role = "citizen";
   State.showRoleSheet = false;
   await refreshAndRender();
-  showToast("ログアウトしました");
+  showToast("管理者からログアウトしました");
 }
 
 /* ----------------------------- ビューの貼り替え ----------------------------- */
@@ -222,6 +287,12 @@ function afterRender() {
       b.onclick = () => {
         State.mapMode = b.dataset.mode;
         renderAll();
+      };
+    });
+    document.querySelectorAll("[data-onlymine]").forEach((b) => {
+      b.onclick = async () => {
+        State.onlyMine = b.dataset.onlymine === "1";
+        await refreshAndRender();
       };
     });
     wireOpenButtons();
@@ -314,7 +385,6 @@ function wireForm() {
       addressNote: f.addressNote,
       comment: f.comment,
       photo: f.photoData,
-      reporter: "あなた",
     });
     State.view = "map";
     State.mapMode = "list";
@@ -339,9 +409,14 @@ function showToast(msg) {
 (async function init() {
   try {
     const me = await fetchMe();
-    if (me) {
-      State.staffUser = me;
+    if (me.staff) {
+      State.staffUser = me.staff;
       State.role = "staff";
+    } else if (me.citizen) {
+      State.citizenUser = me.citizen;
+      State.role = "citizen";
+    } else {
+      State.role = "public";
     }
   } catch (e) {
     // ログイン状態の取得に失敗してもアプリ自体は起動させる
