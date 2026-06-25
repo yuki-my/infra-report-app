@@ -1,0 +1,19 @@
+# データベース（個人情報を含む可能性があるため、リポジトリには含めない）
+backend/*.db
+backend/*.db-journal
+
+# 環境変数（パスワード・秘密鍵を含む）
+.env
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS / エディタ
+.DS_Store
+.vscode/
+*.swp

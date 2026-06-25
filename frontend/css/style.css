@@ -1,0 +1,174 @@
+:root {
+  --green: #16a34a;
+  --green-dark: #15803d;
+  --green-soft: #16a34a14;
+  --bg: #f4f6f5;
+  --card: #ffffff;
+  --text: #0f172a;
+  --sub: #64748a;
+  --border: #e3e7e4;
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+
+#app {
+  font-family: "Noto Sans JP", "Hiragino Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+button { font-family: inherit; }
+input, select, textarea { font-family: inherit; font-size: 14px; }
+
+/* ---- top bar ---- */
+.topbar {
+  position: sticky; top: 0; z-index: 30; background: #fff;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px;
+}
+.logo { display: flex; align-items: center; gap: 8px; }
+.logo .mark {
+  width: 30px; height: 30px; border-radius: 9px; background: var(--green);
+  display: flex; align-items: center; justify-content: center; color: #fff; flex: none;
+}
+.logo .title { font-weight: 800; font-size: 15.5px; letter-spacing: -0.01em; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.role-pill {
+  display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 100px;
+  background: #f1f3f1; border: 1px solid var(--border); font-size: 12px; font-weight: 700;
+  color: var(--sub); cursor: pointer; white-space: nowrap;
+}
+.role-pill svg { color: var(--green); }
+.icon-btn { background: none; border: none; color: var(--sub); cursor: pointer; padding: 6px; display: flex; }
+
+/* ---- content ---- */
+.content { flex: 1; padding: 16px 14px 96px; max-width: 760px; width: 100%; margin: 0 auto; }
+h1.page-title { font-size: 19px; font-weight: 800; margin: 0 0 2px; }
+.page-sub { font-size: 12.5px; color: var(--sub); margin: 0 0 16px; }
+.back-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.back-row button { background: none; border: none; color: var(--text); cursor: pointer; display: flex; padding: 4px; }
+.back-row h1 { font-size: 18px; font-weight: 800; margin: 0; }
+
+/* ---- buttons ---- */
+.btn-primary {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  background: var(--green); color: #fff; border: none; border-radius: 9px;
+  padding: 11px 16px; font-weight: 700; font-size: 14px; cursor: pointer;
+}
+.btn-primary:hover { background: var(--green-dark); }
+.btn-secondary {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  background: #fff; color: var(--text); border: 1px solid var(--border); border-radius: 9px;
+  padding: 11px 16px; font-weight: 700; font-size: 13.5px; cursor: pointer;
+}
+.btn-ghost { background: none; border: none; color: var(--sub); font-weight: 700; cursor: pointer; padding: 11px 16px; }
+
+/* ---- cards / sections ---- */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.field label .req { color: #dc2626; margin-left: 2px; }
+.field input[type="text"], .field textarea, .field select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px;
+  background: #fff; color: var(--text); outline: none;
+}
+.field select { appearance: none; background-image: none; }
+.select-wrap { position: relative; }
+.select-wrap svg { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--sub); }
+.field textarea { resize: vertical; min-height: 90px; }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+
+.photo-box {
+  width: 100%; max-width: 220px; aspect-ratio: 1; border: 2px dashed #d4d8d4; border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  color: var(--sub); cursor: pointer; background: #fafbfa; overflow: hidden; position: relative;
+}
+.photo-box img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.photo-box .label { font-size: 12.5px; font-weight: 600; }
+.photo-box .retake { position: absolute; bottom: 6px; right: 6px; background: #0008; color: #fff; font-size: 10.5px; padding: 3px 7px; border-radius: 6px; }
+
+.map-box { width: 100%; height: 230px; border-radius: 11px; overflow: hidden; border: 1px solid var(--border); margin-top: 10px; }
+.map-box-tall { height: 280px; }
+.locate-btn { margin-bottom: 0; }
+
+/* ---- map view header / toolbar ---- */
+.map-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.search-wrap { position: relative; flex: 1; min-width: 140px; }
+.search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--sub); }
+.search-wrap input { width: 100%; padding: 9px 12px 9px 34px; border: 1px solid var(--border); border-radius: 9px; background: #fff; }
+.filter-select { padding: 9px 10px; border: 1px solid var(--border); border-radius: 9px; background: #fff; font-size: 13px; color: var(--text); }
+.seg { display: flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; flex: none; }
+.seg button { border: none; background: #fff; padding: 9px 13px; font-size: 12.5px; font-weight: 700; color: var(--sub); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.seg button.active { background: var(--green); color: #fff; }
+
+.leaflet-map { width: 100%; height: 60vh; min-height: 340px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+
+/* ---- report list cards ---- */
+.report-card {
+  display: flex; gap: 11px; align-items: flex-start; background: #fff; border: 1px solid var(--border);
+  border-radius: 11px; padding: 12px; cursor: pointer; margin-bottom: 9px;
+}
+.cat-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex: none; }
+.report-card .rt { font-size: 13.5px; font-weight: 700; margin-bottom: 2px; }
+.report-card .ra { font-size: 12px; color: var(--sub); display: flex; align-items: center; gap: 4px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 100px; white-space: nowrap; }
+
+/* ---- stat cards ---- */
+.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
+@media (min-width: 560px) { .stat-grid { grid-template-columns: repeat(4, 1fr); } }
+.stat-card { background: #fff; border: 1px solid var(--border); border-radius: 11px; padding: 13px; }
+.stat-card .lbl { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--sub); margin-bottom: 7px; }
+.stat-card .num { font-size: 24px; font-weight: 800; font-family: ui-monospace, Menlo, monospace; }
+
+.banner { display: flex; gap: 8px; align-items: center; font-size: 12.5px; padding: 10px 13px; border-radius: 10px; margin-bottom: 16px; }
+
+/* ---- bottom sheet (detail) ---- */
+.sheet-backdrop { position: fixed; inset: 0; background: #0008; z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
+.sheet { background: #fff; width: 100%; max-width: 560px; border-radius: 18px 18px 0 0; padding: 18px 18px 26px; max-height: 84vh; overflow-y: auto; animation: slideup 0.18s ease-out; }
+@keyframes slideup { from { transform: translateY(24px); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
+.sheet-handle { width: 36px; height: 4px; background: #e3e7e4; border-radius: 100px; margin: 0 auto 14px; }
+.sheet-photo { width: 100%; height: 160px; border-radius: 11px; background: #f1f3f1; display: flex; align-items: center; justify-content: center; color: var(--sub); font-size: 12.5px; gap: 6px; overflow: hidden; margin-bottom: 14px; }
+.sheet-photo img { width: 100%; height: 100%; object-fit: cover; }
+.kv { font-size: 13px; color: var(--text); line-height: 1.7; margin-bottom: 3px; }
+.kv b { color: var(--sub); font-weight: 700; margin-right: 4px; }
+
+/* ---- role switch sheet ---- */
+.role-option {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  padding: 11px 13px; border-radius: 11px; border: 1px solid var(--border); background: #fff;
+  cursor: pointer; color: var(--text);
+}
+.role-option .ro-title { font-size: 13.5px; font-weight: 700; }
+.role-option .ro-sub { font-size: 11.5px; color: var(--sub); margin-top: 1px; }
+
+/* ---- bottom tab bar ---- */
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 35; background: #fff; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-around; padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+}
+.tab-item { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; color: var(--sub); cursor: pointer; font-size: 11px; font-weight: 700; padding: 4px 14px; }
+.tab-item.active { color: var(--green); }
+.tab-fab {
+  width: 52px; height: 52px; border-radius: 50%; background: var(--green); color: #fff; display: flex; align-items: center;
+  justify-content: center; margin-top: -26px; box-shadow: 0 4px 10px #16a34a55; border: 4px solid #fff; cursor: pointer;
+}
+.tab-fab-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tab-fab-wrap span { font-size: 11px; font-weight: 700; color: var(--green); }
+
+.toast {
+  position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); background: #16a34a; color: #fff;
+  padding: 10px 16px; border-radius: 10px; font-size: 13px; display: flex; align-items: center; gap: 7px; z-index: 50;
+  box-shadow: 0 4px 14px #0003;
+}
+
+.empty { text-align: center; padding: 40px 20px; color: var(--sub); font-size: 13px; }
+.form-row-2 { display: grid; grid-template-columns: 1fr; gap: 0; }
+@media (min-width: 520px) { .form-row-2 { grid-template-columns: 1fr 1fr; gap: 14px; } }
+
+.leaflet-div-icon { background: none; border: none; }

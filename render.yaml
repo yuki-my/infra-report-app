@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: infra-report-app
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -b 0.0.0.0:$PORT app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SETAGAYA_STAFF_PASSWORD
+        sync: false
+      - key: MIZUHO_STAFF_PASSWORD
+        sync: false
+      - key: FLASK_ENV
+        value: production
+      - key: DB_PATH
+        value: /var/data/infra_report.db
+    disk:
+      name: sqlite-data
+      mountPath: /var/data
+      sizeGB: 1
