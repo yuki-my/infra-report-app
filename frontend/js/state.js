@@ -11,6 +11,9 @@ export const State = {
   view: "map",        // map | form | dashboard
   mapMode: "map",     // map | list
 
+  showGate: true,      // true: 入口ゲート（ログイン/登録/ゲスト選択）を表示中
+  gateStep: "choice",  // ゲート内の画面: "choice" | "signup" | "login"
+
   reports: [],         // /api/reports から取得したキャッシュ
   stats: {},
 

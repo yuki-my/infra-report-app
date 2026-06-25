@@ -24,6 +24,7 @@ import { renderFormView, mountFormMap, nearestArea } from "./views/formView.js";
 import { renderDashboardView } from "./views/dashboardView.js";
 import { renderSheet } from "./views/sheet.js";
 import { renderRoleSheet } from "./views/roleSheet.js";
+import { renderGate } from "./views/gateView.js";
 
 const app = document.getElementById("app");
 
@@ -42,6 +43,75 @@ async function loadReports() {
 async function loadStats() {
   const reporterFilter = State.onlyMine && State.citizenUser ? State.citizenUser.username : null;
   State.stats = await fetchStats({ reporter: reporterFilter });
+}
+
+/* ----------------------------- 入口ゲート ----------------------------- */
+
+function renderGateScreen() {
+  app.innerHTML = renderGate();
+  wireGate();
+}
+
+function wireGate() {
+  app.querySelectorAll("[data-gate]").forEach((b) => {
+    b.onclick = async () => {
+      const choice = b.dataset.gate;
+      if (choice === "guest") {
+        await enterApp("citizen");
+        return;
+      }
+      State.gateStep = choice; // "signup" | "login"
+      State.loginError = null;
+      renderGateScreen();
+    };
+  });
+
+  const backBtn = document.getElementById("gateBack");
+  if (backBtn) {
+    backBtn.onclick = () => {
+      State.gateStep = "choice";
+      State.loginError = null;
+      renderGateScreen();
+    };
+  }
+
+  const submitBtn = document.getElementById("gateSubmit");
+  if (submitBtn) {
+    submitBtn.onclick = () => doGateAuth();
+    ["gateUsername", "gatePassword"].forEach((id) => {
+      document.getElementById(id).onkeydown = (e) => {
+        if (e.key === "Enter") doGateAuth();
+      };
+    });
+  }
+}
+
+async function doGateAuth() {
+  const username = document.getElementById("gateUsername").value.trim();
+  const password = document.getElementById("gatePassword").value;
+  if (!username || !password) {
+    State.loginError = "ユーザーIDとパスワードを入力してください";
+    renderGateScreen();
+    return;
+  }
+  try {
+    const action = State.gateStep === "signup" ? citizenSignup : citizenLogin;
+    const user = await action(username, password);
+    State.citizenUser = user;
+    State.loginError = null;
+    await enterApp("citizen");
+    showToast(State.gateStep === "signup" ? `登録しました（ID: ${user.username}）` : `ログインしました（ID: ${user.username}）`);
+  } catch (err) {
+    State.loginError = err.message;
+    renderGateScreen();
+  }
+}
+
+/** ゲートを抜けてメイン画面に入る共通処理 */
+async function enterApp(role) {
+  State.role = role;
+  State.showGate = false;
+  await refreshAndRender();
 }
 
 /* ----------------------------- 外枠（ヘッダー・タブバー）----------------------------- */
@@ -412,15 +482,23 @@ function showToast(msg) {
     if (me.staff) {
       State.staffUser = me.staff;
       State.role = "staff";
+      State.showGate = false;
     } else if (me.citizen) {
       State.citizenUser = me.citizen;
       State.role = "citizen";
+      State.showGate = false;
     } else {
-      State.role = "public";
+      State.showGate = true; // 未ログイン → 入口ゲートを表示
     }
   } catch (e) {
-    // ログイン状態の取得に失敗してもアプリ自体は起動させる
+    // ログイン状態の取得に失敗した場合も、ゲートを表示してアプリを継続させる
     console.warn("fetchMe failed", e);
+    State.showGate = true;
   }
-  await refreshAndRender();
+
+  if (State.showGate) {
+    renderGateScreen();
+  } else {
+    await refreshAndRender();
+  }
 })();
